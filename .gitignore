@@ -122,7 +122,6 @@ out
 .pnp.*
 
 # Build output
-dist/
 dist-ssr/
 *.local
 
