@@ -337,18 +337,18 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
         formData.append('term', String(term));
         formData.append('monthlyRepayment', String(repaymentData.monthlyRepayment));
 
-        formData.append('title', personalDetails.title);
-        formData.append('applicantName', `${personalDetails.firstName} ${personalDetails.surname}`);
-        formData.append('idOrPassport', personalDetails.idOrPassport);
-        formData.append('mobileNumber', personalDetails.mobileNumber);
-        formData.append('email', personalDetails.email);
-        formData.append('address', `${personalDetails.residentialAddress}, ${personalDetails.city}, ${personalDetails.province}`);
+        formData.append('title', personalDetails.title || 'Mr');
+        formData.append('applicantName', `${personalDetails.firstName || ''} ${personalDetails.surname || ''}`.trim() || 'Applicant');
+        formData.append('idOrPassport', personalDetails.idOrPassport || 'N/A');
+        formData.append('mobileNumber', personalDetails.mobileNumber || 'N/A');
+        formData.append('email', personalDetails.email || 'N/A');
+        formData.append('address', `${personalDetails.residentialAddress || ''}, ${personalDetails.city || ''}, ${personalDetails.province || ''}`);
 
-        formData.append('employmentStatus', employmentDetails.employmentStatus);
-        formData.append('monthlyIncome', String(employmentDetails.grossMonthlyIncome));
-        formData.append('bankName', bankDetails.bankName);
-        formData.append('accountNumber', bankDetails.accountNumber);
-        formData.append('accountType', bankDetails.accountType);
+        formData.append('employmentStatus', personalDetails.employmentStatus || 'Permanently Employed');
+        formData.append('monthlyIncome', String(personalDetails.monthlyGrossIncome || personalDetails.monthlyNetIncome || 0));
+        formData.append('bankName', banking.bankName || 'Standard Bank');
+        formData.append('accountNumber', banking.accountNumber || 'N/A');
+        formData.append('accountType', banking.accountType || 'Cheque Account');
 
         // Attach uploaded documents
         Object.keys(uploadedFiles).forEach((key) => {
