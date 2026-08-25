@@ -320,33 +320,43 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
       const generatedRef = `APP-ZA-2026-${Math.floor(10000 + Math.random() * 90000)}`;
 
       try {
-        await fetch('/api/submit.php', {
+        const payload = {
+          type: 'application',
+          refNumber: generatedRef,
+          loanType: loanType,
+          amount: amount,
+          term: term,
+          monthlyRepayment: repaymentData.monthlyRepayment,
+
+          title: personalDetails.title,
+          applicantName: `${personalDetails.firstName} ${personalDetails.surname}`,
+          idOrPassport: personalDetails.idOrPassport,
+          mobileNumber: personalDetails.mobileNumber,
+          email: personalDetails.email,
+          address: personalDetails.residentialAddress,
+          city: personalDetails.city,
+          province: personalDetails.province,
+
+          employmentStatus: employmentDetails.employmentStatus,
+          monthlyIncome: employmentDetails.grossMonthlyIncome,
+          bankName: bankDetails.bankName,
+          accountNumber: bankDetails.accountNumber,
+          accountType: bankDetails.accountType,
+        };
+
+        const res = await fetch('/api/submit.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'application',
-            refNumber: generatedRef,
-            loanType: loanType,
-            amount: amount,
-            term: term,
-            monthlyRepayment: repaymentData.monthlyRepayment,
-
-            title: personalDetails.title,
-            applicantName: `${personalDetails.firstName} ${personalDetails.surname}`,
-            idOrPassport: personalDetails.idOrPassport,
-            mobileNumber: personalDetails.mobileNumber,
-            email: personalDetails.email,
-            address: personalDetails.residentialAddress,
-            city: personalDetails.city,
-            province: personalDetails.province,
-
-            employmentStatus: employmentDetails.employmentStatus,
-            monthlyIncome: employmentDetails.grossMonthlyIncome,
-            bankName: bankDetails.bankName,
-            accountNumber: bankDetails.accountNumber,
-            accountType: bankDetails.accountType,
-          }),
+          body: JSON.stringify(payload),
         });
+
+        if (!res.ok) {
+          await fetch('/submit.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+        }
       } catch (err) {
         console.warn('Backend application submission warning:', err);
       }

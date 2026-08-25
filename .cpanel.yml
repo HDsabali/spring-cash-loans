@@ -2,4 +2,9 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/springca/public_html
-    - /bin/cp -R dist/* $DEPLOYPATH
+    - /bin/mkdir -p $DEPLOYPATH/api
+    - /bin/cp -R dist/* $DEPLOYPATH/
+    - /bin/cp public/api/submit.php $DEPLOYPATH/api/submit.php
+    - /bin/cp public/api/submit.php $DEPLOYPATH/submit.php
+    - /bin/cp public/api/config.php $DEPLOYPATH/api/config.php
+    - /bin/cp public/api/config.php $DEPLOYPATH/config.php

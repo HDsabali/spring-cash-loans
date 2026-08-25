@@ -85,22 +85,32 @@ export const ContactUs: React.FC<ContactUsProps> = ({ onOpenApplyModal, onGoHome
     const ref = `ENQ-ZA-2026-${Math.floor(10000 + Math.random() * 90000)}`;
 
     try {
-      await fetch('/api/submit.php', {
+      const payload = {
+        type: 'contact',
+        refNumber: ref,
+        fullName: formData.fullName,
+        email: formData.email,
+        mobileNumber: formData.mobileNumber,
+        category: formData.category,
+        contactMethod: formData.contactMethod,
+        message: formData.message,
+        privacyConsent: formData.privacyConsent,
+        marketingConsent: formData.marketingConsent,
+      };
+
+      const res = await fetch('/api/submit.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'contact',
-          refNumber: ref,
-          fullName: formData.fullName,
-          email: formData.email,
-          mobileNumber: formData.mobileNumber,
-          category: formData.category,
-          contactMethod: formData.contactMethod,
-          message: formData.message,
-          privacyConsent: formData.privacyConsent,
-          marketingConsent: formData.marketingConsent,
-        }),
+        body: JSON.stringify(payload),
       });
+
+      if (!res.ok) {
+        await fetch('/submit.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      }
     } catch (err) {
       console.warn('Backend email submission warning:', err);
     }
