@@ -119,6 +119,7 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
   });
 
   // Uploaded Files Tracker
+  const [uploadedFiles, setUploadedFiles] = useState<{ [key: string]: File }>({});
   const [documents, setDocuments] = useState({
     idDoc: { uploaded: false, name: '' },
     payslipDoc: { uploaded: false, name: '' },
@@ -246,10 +247,11 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
     setDirectors((prev) => prev.filter((d) => d.id !== id));
   };
 
-  const handleFileUpload = (docKey: keyof typeof documents, fileName: string) => {
+  const handleFileUpload = (docKey: keyof typeof documents, fileObj: File) => {
+    setUploadedFiles((prev) => ({ ...prev, [docKey]: fileObj }));
     setDocuments((prev) => ({
       ...prev,
-      [docKey]: { uploaded: true, name: fileName || 'uploaded_document.pdf' },
+      [docKey]: { uploaded: true, name: fileObj.name || 'uploaded_document.pdf' },
     }));
   };
 
@@ -325,38 +327,44 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
       const generatedRef = `APP-ZA-2026-${Math.floor(10000 + Math.random() * 90000)}`;
 
       try {
-        const formBody = new URLSearchParams();
-        formBody.append('type', 'application');
-        formBody.append('refNumber', generatedRef);
-        formBody.append('loanType', loanType);
-        formBody.append('amount', String(amount));
-        formBody.append('term', String(term));
-        formBody.append('monthlyRepayment', String(repaymentData.monthlyRepayment));
+        const formData = new FormData();
+        formData.append('type', 'application');
+        formData.append('refNumber', generatedRef);
+        formData.append('loanType', loanType);
+        formData.append('amount', String(amount));
+        formData.append('term', String(term));
+        formData.append('monthlyRepayment', String(repaymentData.monthlyRepayment));
 
-        formBody.append('title', personalDetails.title);
-        formBody.append('applicantName', `${personalDetails.firstName} ${personalDetails.surname}`);
-        formBody.append('idOrPassport', personalDetails.idOrPassport);
-        formBody.append('mobileNumber', personalDetails.mobileNumber);
-        formBody.append('email', personalDetails.email);
-        formBody.append('address', `${personalDetails.residentialAddress}, ${personalDetails.city}, ${personalDetails.province}`);
+        formData.append('title', personalDetails.title);
+        formData.append('applicantName', `${personalDetails.firstName} ${personalDetails.surname}`);
+        formData.append('idOrPassport', personalDetails.idOrPassport);
+        formData.append('mobileNumber', personalDetails.mobileNumber);
+        formData.append('email', personalDetails.email);
+        formData.append('address', `${personalDetails.residentialAddress}, ${personalDetails.city}, ${personalDetails.province}`);
 
-        formBody.append('employmentStatus', employmentDetails.employmentStatus);
-        formBody.append('monthlyIncome', String(employmentDetails.grossMonthlyIncome));
-        formBody.append('bankName', bankDetails.bankName);
-        formBody.append('accountNumber', bankDetails.accountNumber);
-        formBody.append('accountType', bankDetails.accountType);
+        formData.append('employmentStatus', employmentDetails.employmentStatus);
+        formData.append('monthlyIncome', String(employmentDetails.grossMonthlyIncome));
+        formData.append('bankName', bankDetails.bankName);
+        formData.append('accountNumber', bankDetails.accountNumber);
+        formData.append('accountType', bankDetails.accountType);
+
+        // Attach uploaded documents
+        Object.keys(uploadedFiles).forEach((key) => {
+          const fileObj = uploadedFiles[key];
+          if (fileObj) {
+            formData.append(`file_${key}`, fileObj, fileObj.name);
+          }
+        });
 
         const res = await fetch('/submit.php', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: formBody.toString(),
+          body: formData,
         });
 
         if (!res.ok) {
           await fetch('/api/submit.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: formBody.toString(),
+            body: formData,
           });
         }
       } catch (err) {
@@ -1120,11 +1128,11 @@ STATUS: APPLICATION SUBMITTED & UNDER ASSESSMENT
                             <span>{docState.uploaded ? docState.name : 'Upload Document'}</span>
                             <input
                               type="file"
-                              accept=".pdf,.jpg,.png"
+                              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                               className="hidden"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
-                                if (file) handleFileUpload(docItem.key as any, file.name);
+                                if (file) handleFileUpload(docItem.key as any, file);
                               }}
                             />
                           </label>
