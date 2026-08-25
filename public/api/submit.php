@@ -1,7 +1,18 @@
 <?php
-header('Content-Type: application/json; charset=utf-8');
+error_reporting(0);
+@ini_set('display_errors', '0');
 
-$input = file_get_contents('php://input');
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+$input = @file_get_contents('php://input');
 $data = json_decode($input, true);
 
 if (!$data) {
@@ -9,8 +20,8 @@ if (!$data) {
     exit();
 }
 
-$type = isset($data['type']) ? $data['type'] : 'contact';
-$ref = isset($data['refNumber']) ? $data['refNumber'] : 'REF-' . rand(1000, 9999);
+$type = isset($data['type']) ? strtolower(trim($data['type'])) : 'contact';
+$ref = isset($data['refNumber']) && !empty($data['refNumber']) ? $data['refNumber'] : 'REF-' . rand(1000, 9999);
 
 if ($type === 'application') {
     $to = 'applications@springcashloans.co.za';
@@ -37,8 +48,13 @@ if ($type === 'application') {
         $headers .= "Reply-To: " . $data['email'] . "\r\n";
     }
 
-    $sent = @mail($to, $subject, $message, $headers);
-    echo json_encode(['success' => true, 'mailSent' => (bool)$sent]);
+    try {
+        $sent = @mail($to, $subject, $message, $headers);
+    } catch (Exception $e) {
+        $sent = false;
+    }
+
+    echo json_encode(['success' => true, 'refNumber' => $ref, 'mailSent' => (bool)$sent]);
     exit();
 } else {
     $to = 'info@springcashloans.co.za';
@@ -58,7 +74,12 @@ if ($type === 'application') {
         $headers .= "Reply-To: " . $data['email'] . "\r\n";
     }
 
-    $sent = @mail($to, $subject, $message, $headers);
-    echo json_encode(['success' => true, 'mailSent' => (bool)$sent]);
+    try {
+        $sent = @mail($to, $subject, $message, $headers);
+    } catch (Exception $e) {
+        $sent = false;
+    }
+
+    echo json_encode(['success' => true, 'refNumber' => $ref, 'mailSent' => (bool)$sent]);
     exit();
 }
