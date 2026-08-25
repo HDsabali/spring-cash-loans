@@ -58,8 +58,13 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
   // Step 1 State: Personalise
   const [loanType, setLoanType] = useState<'personal' | 'business' | 'asset'>(initialLoanType);
   const [amount, setAmount] = useState<number>(initialAmount);
+  const [amountInput, setAmountInput] = useState<string>(String(initialAmount));
   const [term, setTerm] = useState<number>(initialTerm);
   const [creditProtectionChoice, setCreditProtectionChoice] = useState<'yes' | 'no' | 'existing'>('yes');
+
+  useEffect(() => {
+    setAmountInput(String(amount));
+  }, [amount]);
 
   // Step 2 State: Your Details
   const [personalDetails, setPersonalDetails] = useState({
@@ -582,14 +587,27 @@ STATUS: APPLICATION SUBMITTED & UNDER ASSESSMENT
                   </div>
 
                   <div className="relative flex items-center">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#168C8C] font-extrabold text-xl pointer-events-none">R</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#168C8C] font-extrabold text-xl pointer-events-none select-none">R</span>
                     <input
-                      type="number"
-                      min={5000}
-                      max={350000}
-                      step={5000}
-                      value={amount}
-                      onChange={(e) => setAmount(Number(e.target.value))}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={amountInput}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9]/g, '');
+                        setAmountInput(raw);
+                        const num = Number(raw);
+                        if (!isNaN(num) && num > 0) {
+                          setAmount(Math.min(Math.max(num, 5000), 350000));
+                        }
+                      }}
+                      onBlur={() => {
+                        let num = Number(amountInput);
+                        if (isNaN(num) || num < 5000) num = 5000;
+                        if (num > 350000) num = 350000;
+                        setAmount(num);
+                        setAmountInput(String(num));
+                      }}
                       className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-[#E4E7EB] rounded-xl font-bold text-xl text-[#102A43] focus:ring-2 focus:ring-[#168C8C] focus:bg-white outline-none transition-all"
                     />
                   </div>
@@ -600,8 +618,12 @@ STATUS: APPLICATION SUBMITTED & UNDER ASSESSMENT
                     max={350000}
                     step={5000}
                     value={amount}
-                    onChange={(e) => setAmount(Number(e.target.value))}
-                    className="w-full accent-[#168C8C] h-2 bg-slate-200 rounded-lg cursor-pointer"
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      setAmount(val);
+                      setAmountInput(String(val));
+                    }}
+                    className="w-full accent-[#168C8C] h-3 bg-slate-200 rounded-lg cursor-pointer touch-action-none py-1"
                   />
                 </div>
 
