@@ -386,36 +386,6 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDownloadSummary = () => {
-    const summaryText = `
-SPRING CASH LOANS (PTY) LTD - LOAN APPLICATION SUMMARY
-Reference: ${refNumber}
-Date: ${new Date().toLocaleDateString()}
-
-Product: ${loanType.toUpperCase()} LOAN
-Loan Amount: ${formatRandSpace(amount)}
-Repayment Term: ${term} Months
-Estimated Monthly Repayment: ${formatRandSpace(repaymentData.monthlyRepayment, true)}
-Interest Rate: From 11.75% p.a.
-
-APPLICANT DETAILS:
-Name: ${personalDetails.title} ${personalDetails.firstName} ${personalDetails.surname}
-ID/Passport: ${personalDetails.idOrPassport}
-Mobile: ${personalDetails.mobileNumber}
-Email: ${personalDetails.email}
-Address: ${personalDetails.residentialAddress}, ${personalDetails.city}, ${personalDetails.province}
-
-STATUS: APPLICATION SUBMITTED & UNDER ASSESSMENT
-    `.trim();
-
-    const element = document.createElement('a');
-    const file = new Blob([summaryText], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    element.download = `Spring_Cash_Loans_Application_${refNumber}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-  };
 
   return (
     <div className="w-full max-w-[1150px] mx-auto px-4 sm:px-6 py-4 font-sans text-[#102A43]">
