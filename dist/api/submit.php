@@ -1,10 +1,10 @@
 <?php
 /**
- * Spring Cash Loans (Pty) Ltd - Authenticated cPanel SMTP & Mail Handler API
- * Sends incoming Contact Us enquiries and Loan Applications using authenticated SMTP via cPanel.
+ * Spring Cash Loans (Pty) Ltd - Standard cPanel Mail Handler API
+ * Sends Contact Us enquiries to info@springcashloans.co.za
+ * Sends Loan Applications to applications@springcashloans.co.za
  */
 
-// Enable CORS and set JSON response header
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -21,105 +21,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-// Load Configuration if available
-if (file_exists(__DIR__ . '/config.php')) {
-    require_once __DIR__ . '/config.php';
-}
-
-if (!defined('SMTP_HOST')) define('SMTP_HOST', 'localhost');
-if (!defined('SMTP_PORT')) define('SMTP_PORT', 465);
-if (!defined('INFO_EMAIL')) define('INFO_EMAIL', 'info@springcashloans.co.za');
-if (!defined('INFO_EMAIL_PASS')) define('INFO_EMAIL_PASS', '');
-if (!defined('APPLICATIONS_EMAIL')) define('APPLICATIONS_EMAIL', 'applications@springcashloans.co.za');
-if (!defined('APPLICATIONS_EMAIL_PASS')) define('APPLICATIONS_EMAIL_PASS', '');
-
-// Read raw JSON input
+// Read raw JSON payload
 $inputRaw = file_get_contents('php://input');
 $data = json_decode($inputRaw, true);
 
 if (!$data) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Invalid or missing JSON payload']);
+    echo json_encode(['success' => false, 'message' => 'Invalid JSON input']);
     exit();
 }
 
-// Logging helper for diagnostic tracking
-function logSubmission($msg) {
-    $logFile = __DIR__ . '/mail_log.txt';
-    @file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] " . $msg . "\n", FILE_APPEND);
-}
-
-/**
- * Pure PHP SMTP Socket Sender Class
- * Authenticates with cPanel SMTP (mail.springcashloans.co.za:465 SSL) for 100% inbox delivery.
- */
-class SmtpMailer {
-    public static function send($host, $port, $username, $password, $to, $subject, $htmlBody, $replyTo = '') {
-        if (empty($password) || $password === 'YOUR_INFO_EMAIL_PASSWORD' || $password === 'YOUR_APPLICATIONS_EMAIL_PASSWORD') {
-            return false; // Passwords not configured yet, fallback to PHP mail()
-        }
-
-        $context = stream_context_create([
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true
-            ]
-        ]);
-
-        $socket = @stream_socket_client("ssl://" . $host . ":" . $port, $errno, $errstr, 15, STREAM_CLIENT_CONNECT, $context);
-        if (!$socket) {
-            logSubmission("SMTP Socket Connection Failed to {$host}:{$port} - Error: {$errstr} ({$errno})");
-            return false;
-        }
-
-        $getResponse = function() use ($socket) {
-            $response = "";
-            while ($line = @fgets($socket, 512)) {
-                $response .= $line;
-                if (substr($line, 3, 1) == " ") break;
-            }
-            return $response;
-        };
-
-        $getResponse();
-        fputs($socket, "EHLO " . $host . "\r\n"); $getResponse();
-        fputs($socket, "AUTH LOGIN\r\n"); $getResponse();
-        fputs($socket, base64_encode($username) . "\r\n"); $getResponse();
-        fputs($socket, base64_encode($password) . "\r\n"); $authRes = $getResponse();
-
-        if (strpos($authRes, '235') === false) {
-            logSubmission("SMTP Auth Failed for {$username} - Response: " . trim($authRes));
-            fclose($socket);
-            return false;
-        }
-
-        fputs($socket, "MAIL FROM: <" . $username . ">\r\n"); $getResponse();
-        fputs($socket, "RCPT TO: <" . $to . ">\r\n"); $getResponse();
-        fputs($socket, "DATA\r\n"); $getResponse();
-
-        $headers  = "MIME-Version: 1.0\r\n";
-        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-        $headers .= "From: Spring Cash Loans <" . $username . ">\r\n";
-        $headers .= "To: <" . $to . ">\r\n";
-        $headers .= "Subject: " . $subject . "\r\n";
-        if (!empty($replyTo)) {
-            $headers .= "Reply-To: " . $replyTo . "\r\n";
-        }
-        $headers .= "Date: " . date("r") . "\r\n";
-
-        fputs($socket, $headers . "\r\n" . $htmlBody . "\r\n.\r\n");
-        $dataRes = $getResponse();
-        fputs($socket, "QUIT\r\n");
-        fclose($socket);
-
-        return strpos($dataRes, "250") !== false;
-    }
-}
-
 $submissionType = isset($data['type']) ? strtolower(trim($data['type'])) : 'contact';
-
-// Generate reference number
 $refNumber = isset($data['refNumber']) && !empty($data['refNumber']) 
     ? $data['refNumber'] 
     : ($submissionType === 'application' 
@@ -128,9 +40,9 @@ $refNumber = isset($data['refNumber']) && !empty($data['refNumber'])
 
 if ($submissionType === 'application') {
     // ==========================================
-    // LOAN APPLICATION EMAIL SUBMISSION
+    // LOAN APPLICATION -> applications@springcashloans.co.za
     // ==========================================
-    $to = APPLICATIONS_EMAIL;
+    $to = 'applications@springcashloans.co.za';
     $subject = "NEW LOAN APPLICATION: [{$refNumber}] - " . ($data['applicantName'] ?? 'Applicant');
     
     $loanType = strtoupper($data['loanType'] ?? 'PERSONAL');
@@ -213,52 +125,35 @@ if ($submissionType === 'application') {
           </p>
         </div>
         <div class='footer'>
-          Spring Cash Loans (Pty) Ltd &bull; National Credit Regulator (NCR) Number: NCRCP19642
+          Spring Cash Loans (Pty) Ltd &bull; NCRCP19642
         </div>
       </div>
     </body>
     </html>
     ";
 
-    // Attempt 1: Authenticated cPanel SMTP Delivery
-    $mailSent = SmtpMailer::send(
-        SMTP_HOST,
-        SMTP_PORT,
-        APPLICATIONS_EMAIL,
-        APPLICATIONS_EMAIL_PASS,
-        $to,
-        $subject,
-        $htmlBody,
-        $email
-    );
-
-    // Attempt 2: PHP mail() Fallback
-    if (!$mailSent) {
-        $headers = "MIME-Version: 1.0" . "\r\n";
-        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-        $headers .= "From: Spring Cash Loans <" . APPLICATIONS_EMAIL . ">" . "\r\n";
-        if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $headers .= "Reply-To: {$email}" . "\r\n";
-        }
-        $mailSent = @mail($to, $subject, $htmlBody, $headers, "-f " . APPLICATIONS_EMAIL);
-        logSubmission("APPLICATION [{$refNumber}] - PHP mail() Fallback Result: " . ($mailSent ? 'SUCCESS' : 'FAILED'));
-    } else {
-        logSubmission("APPLICATION [{$refNumber}] - Authenticated SMTP Result: SUCCESS");
+    $headers = "MIME-Version: 1.0" . "\r\n";
+    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+    $headers .= "From: Spring Cash Loans <applications@springcashloans.co.za>" . "\r\n";
+    if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $headers .= "Reply-To: {$email}" . "\r\n";
     }
+
+    $mailSent = mail($to, $subject, $htmlBody, $headers);
 
     echo json_encode([
         'success' => true,
         'refNumber' => $refNumber,
         'mailSent' => $mailSent,
-        'message' => 'Application submitted successfully to ' . $to
+        'message' => 'Application submitted to ' . $to
     ]);
     exit();
 
 } else {
     // ==========================================
-    // CONTACT US ENQUIRY EMAIL SUBMISSION
+    // CONTACT ENQUIRY -> info@springcashloans.co.za
     // ==========================================
-    $to = INFO_EMAIL;
+    $to = 'info@springcashloans.co.za';
     $category = htmlspecialchars($data['category'] ?? 'General enquiry');
     $subject = "ENQUIRY: [{$refNumber}] - {$category} from " . ($data['fullName'] ?? 'Customer');
 
@@ -314,37 +209,20 @@ if ($submissionType === 'application') {
     </html>
     ";
 
-    // Attempt 1: Authenticated cPanel SMTP Delivery
-    $mailSent = SmtpMailer::send(
-        SMTP_HOST,
-        SMTP_PORT,
-        INFO_EMAIL,
-        INFO_EMAIL_PASS,
-        $to,
-        $subject,
-        $htmlBody,
-        $email
-    );
-
-    // Attempt 2: PHP mail() Fallback
-    if (!$mailSent) {
-        $headers = "MIME-Version: 1.0" . "\r\n";
-        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-        $headers .= "From: Spring Cash Loans <" . INFO_EMAIL . ">" . "\r\n";
-        if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $headers .= "Reply-To: {$email}" . "\r\n";
-        }
-        $mailSent = @mail($to, $subject, $htmlBody, $headers, "-f " . INFO_EMAIL);
-        logSubmission("CONTACT ENQUIRY [{$refNumber}] - PHP mail() Fallback Result: " . ($mailSent ? 'SUCCESS' : 'FAILED'));
-    } else {
-        logSubmission("CONTACT ENQUIRY [{$refNumber}] - Authenticated SMTP Result: SUCCESS");
+    $headers = "MIME-Version: 1.0" . "\r\n";
+    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+    $headers .= "From: Spring Cash Loans <info@springcashloans.co.za>" . "\r\n";
+    if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $headers .= "Reply-To: {$email}" . "\r\n";
     }
+
+    $mailSent = mail($to, $subject, $htmlBody, $headers);
 
     echo json_encode([
         'success' => true,
         'refNumber' => $refNumber,
         'mailSent' => $mailSent,
-        'message' => 'Enquiry submitted successfully to ' . $to
+        'message' => 'Enquiry submitted to ' . $to
     ]);
     exit();
 }
