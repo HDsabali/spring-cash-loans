@@ -53,7 +53,7 @@ if (!empty($_FILES)) {
 }
 
 /**
- * Formal HTML & Attachment SmtpMailer
+ * Formal & Clean SmtpMailer supporting Attachments & Clean HTML/Text formatting
  */
 class SmtpMailer {
     public static function send($host, $username, $password, $to, $subject, $htmlBody, $attachments = []) {
@@ -165,10 +165,10 @@ if ($type === 'application') {
     $to = 'applications@springcashloans.co.za';
     $subject = "NEW LOAN APPLICATION: [{$ref}] - " . ($data['applicantName'] ?? 'Applicant');
     
-    $loanType = strtoupper($data['loanType'] ?? 'PERSONAL');
-    $amount = isset($data['amount']) ? 'R ' . number_format((float)$data['amount'], 2, '.', ' ') : 'N/A';
-    $term = ($data['term'] ?? 'N/A') . ' Months';
-    $monthlyRepayment = isset($data['monthlyRepayment']) ? 'R ' . number_format((float)$data['monthlyRepayment'], 2, '.', ' ') : 'N/A';
+    $loanType = htmlspecialchars(strtoupper($data['loanType'] ?? 'PERSONAL'));
+    $amount = isset($data['amount']) ? 'R ' . number_format((float)$data['amount'], 2, '.', ' ') : 'R 0.00';
+    $term = htmlspecialchars(($data['term'] ?? '0') . ' Months');
+    $monthlyRepayment = isset($data['monthlyRepayment']) ? 'R ' . number_format((float)$data['monthlyRepayment'], 2, '.', ' ') : 'R 0.00';
 
     $applicantName = htmlspecialchars(($data['title'] ?? '') . ' ' . ($data['applicantName'] ?? ''));
     $idOrPassport = htmlspecialchars($data['idOrPassport'] ?? 'N/A');
@@ -179,64 +179,39 @@ if ($type === 'application') {
     $income = isset($data['monthlyIncome']) ? 'R ' . number_format((float)$data['monthlyIncome'], 2, '.', ' ') : 'N/A';
     $bankName = htmlspecialchars($data['bankName'] ?? 'N/A');
     $accountNumber = htmlspecialchars($data['accountNumber'] ?? 'N/A');
+    $accountType = htmlspecialchars($data['accountType'] ?? 'Cheque Account');
 
     $html = <<<HTML
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <style>
-    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 20px; color: #333; }
-    .container { max-width: 650px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e1e4e8; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .header { background-color: #12355B; padding: 24px 30px; text-align: left; }
-    .header h1 { color: #ffffff; margin: 0; font-size: 20px; font-weight: bold; letter-spacing: 0.5px; }
-    .header p { color: #168C8C; margin: 4px 0 0 0; font-size: 13px; font-weight: 600; }
-    .badge { display: inline-block; background: #168C8C; color: #ffffff; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-top: 10px; }
-    .content { padding: 30px; }
-    .section-title { font-size: 13px; font-weight: bold; color: #12355B; text-transform: uppercase; letter-spacing: 1px; margin-top: 20px; margin-bottom: 12px; border-bottom: 2px solid #e7f4f2; padding-bottom: 6px; }
-    .data-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-    .data-table td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
-    .data-table td.label { font-weight: bold; color: #52606D; width: 40%; background-color: #f8fafc; }
-    .data-table td.value { color: #102A43; font-weight: 500; }
-    .footer { background-color: #f8fafc; padding: 16px 30px; border-top: 1px solid #e1e4e8; text-align: center; font-size: 12px; color: #627D98; }
-  </style>
 </head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>SPRING CASH LOANS</h1>
-      <p>Formal Loan Application Notification</p>
-      <div class="badge">Reference: {$ref}</div>
-    </div>
-    <div class="content">
-      <div class="section-title">1. Requested Loan Summary</div>
-      <table class="data-table">
-        <tr><td class="label">Loan Product</td><td class="value">{$loanType} LOAN</td></tr>
-        <tr><td class="label">Requested Amount</td><td class="value">{$amount}</td></tr>
-        <tr><td class="label">Repayment Term</td><td class="value">{$term}</td></tr>
-        <tr><td class="label">Monthly Repayment</td><td class="value">{$monthlyRepayment}</td></tr>
-      </table>
+<body style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #102A43; background-color: #f7f8f6; padding: 20px;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 10px; border: 1px solid #e4e7eb;">
+    <h2 style="color: #12355B; margin-top: 0; border-bottom: 2px solid #168C8C; padding-bottom: 8px;">SPRING CASH LOANS &mdash; NEW LOAN APPLICATION</h2>
+    
+    <p><b>Reference Number:</b> {$ref}</p>
+    <p><b>Loan Type:</b> {$loanType} LOAN</p>
+    <p><b>How much would you like to borrow?:</b> {$amount}</p>
+    <p><b>Repayment Period:</b> {$term}</p>
+    <p><b>Estimated Monthly Repayment:</b> {$monthlyRepayment}</p>
 
-      <div class="section-title">2. Applicant Personal Details</div>
-      <table class="data-table">
-        <tr><td class="label">Full Name</td><td class="value">{$applicantName}</td></tr>
-        <tr><td class="label">ID / Passport Number</td><td class="value">{$idOrPassport}</td></tr>
-        <tr><td class="label">Mobile Number</td><td class="value">{$mobile}</td></tr>
-        <tr><td class="label">Email Address</td><td class="value">{$email}</td></tr>
-        <tr><td class="label">Residential Address</td><td class="value">{$address}</td></tr>
-      </table>
+    <h3 style="color: #12355B; border-bottom: 1px solid #e4e7eb; padding-bottom: 5px; margin-top: 25px;">APPLICANT PERSONAL DETAILS</h3>
+    <p><b>Full Name:</b> {$applicantName}</p>
+    <p><b>ID / Passport Number:</b> {$idOrPassport}</p>
+    <p><b>Mobile Number:</b> {$mobile}</p>
+    <p><b>Email Address:</b> {$email}</p>
+    <p><b>Residential Address:</b> {$address}</p>
 
-      <div class="section-title">3. Employment & Banking Details</div>
-      <table class="data-table">
-        <tr><td class="label">Employment Status</td><td class="value">{$employment}</td></tr>
-        <tr><td class="label">Gross Monthly Income</td><td class="value">{$income}</td></tr>
-        <tr><td class="label">Bank Name</td><td class="value">{$bankName}</td></tr>
-        <tr><td class="label">Account Number</td><td class="value">{$accountNumber}</td></tr>
-      </table>
-    </div>
-    <div class="footer">
-      Official Application Submission • Spring Cash Loans (Pty) Ltd
-    </div>
+    <h3 style="color: #12355B; border-bottom: 1px solid #e4e7eb; padding-bottom: 5px; margin-top: 25px;">EMPLOYMENT & BANKING DETAILS</h3>
+    <p><b>Employment Status:</b> {$employment}</p>
+    <p><b>Gross Monthly Income:</b> {$income}</p>
+    <p><b>Bank Name:</b> {$bankName}</p>
+    <p><b>Account Number:</b> {$accountNumber} ({$accountType})</p>
+
+    <hr style="border: none; border-top: 1px solid #e4e7eb; margin-top: 30px;">
+    <p style="font-size: 12px; color: #627D98; text-align: center;">Spring Cash Loans (Pty) Ltd &bull; Official Loan Application Notification</p>
   </div>
 </body>
 </html>
@@ -261,48 +236,25 @@ HTML;
 <html>
 <head>
   <meta charset="utf-8">
-  <style>
-    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 20px; color: #333; }
-    .container { max-width: 650px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e1e4e8; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .header { background-color: #12355B; padding: 24px 30px; text-align: left; }
-    .header h1 { color: #ffffff; margin: 0; font-size: 20px; font-weight: bold; letter-spacing: 0.5px; }
-    .header p { color: #168C8C; margin: 4px 0 0 0; font-size: 13px; font-weight: 600; }
-    .badge { display: inline-block; background: #168C8C; color: #ffffff; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-top: 10px; }
-    .content { padding: 30px; }
-    .section-title { font-size: 13px; font-weight: bold; color: #12355B; text-transform: uppercase; letter-spacing: 1px; margin-top: 16px; margin-bottom: 12px; border-bottom: 2px solid #e7f4f2; padding-bottom: 6px; }
-    .data-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-    .data-table td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
-    .data-table td.label { font-weight: bold; color: #52606D; width: 40%; background-color: #f8fafc; }
-    .data-table td.value { color: #102A43; font-weight: 500; }
-    .message-box { background-color: #f8fafc; border: 1px solid #e4e7eb; padding: 16px; border-radius: 8px; font-size: 13px; line-height: 1.6; color: #102A43; margin-top: 10px; }
-    .footer { background-color: #f8fafc; padding: 16px 30px; border-top: 1px solid #e1e4e8; text-align: center; font-size: 12px; color: #627D98; }
-  </style>
 </head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>SPRING CASH LOANS</h1>
-      <p>New Contact Enquiry</p>
-      <div class="badge">Reference: {$ref}</div>
-    </div>
-    <div class="content">
-      <div class="section-title">Customer Details</div>
-      <table class="data-table">
-        <tr><td class="label">Category / Topic</td><td class="value">{$category}</td></tr>
-        <tr><td class="label">Full Name</td><td class="value">{$fullName}</td></tr>
-        <tr><td class="label">Email Address</td><td class="value">{$email}</td></tr>
-        <tr><td class="label">Mobile Number</td><td class="value">{$mobile}</td></tr>
-        <tr><td class="label">Preferred Contact</td><td class="value">{$contactMethod}</td></tr>
-      </table>
+<body style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #102A43; background-color: #f7f8f6; padding: 20px;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 10px; border: 1px solid #e4e7eb;">
+    <h2 style="color: #12355B; margin-top: 0; border-bottom: 2px solid #168C8C; padding-bottom: 8px;">SPRING CASH LOANS &mdash; NEW CONTACT ENQUIRY</h2>
+    
+    <p><b>Reference Number:</b> {$ref}</p>
+    <p><b>Category / Topic:</b> {$category}</p>
+    <p><b>Full Name:</b> {$fullName}</p>
+    <p><b>Email Address:</b> {$email}</p>
+    <p><b>Mobile Number:</b> {$mobile}</p>
+    <p><b>Preferred Contact Method:</b> {$contactMethod}</p>
 
-      <div class="section-title">Message Body</div>
-      <div class="message-box">
-        {$userMsg}
-      </div>
+    <h3 style="color: #12355B; border-bottom: 1px solid #e4e7eb; padding-bottom: 5px; margin-top: 25px;">CUSTOMER MESSAGE</h3>
+    <div style="background-color: #f8fafc; border: 1px solid #e4e7eb; padding: 15px; border-radius: 8px;">
+      {$userMsg}
     </div>
-    <div class="footer">
-      Official Contact Enquiry Notification • Spring Cash Loans (Pty) Ltd
-    </div>
+
+    <hr style="border: none; border-top: 1px solid #e4e7eb; margin-top: 30px;">
+    <p style="font-size: 12px; color: #627D98; text-align: center;">Spring Cash Loans (Pty) Ltd &bull; Official Contact Enquiry Notification</p>
   </div>
 </body>
 </html>
