@@ -12,14 +12,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// ====================================================
-// CPANEL EMAIL PASSWORDS (Edit your passwords below)
-// ====================================================
-$INFO_PASS = 'YOUR_INFO_EMAIL_PASSWORD';
-$APP_PASS  = 'YOUR_APPLICATIONS_EMAIL_PASSWORD';
-// ====================================================
+$INFO_PASS = '';
+$APP_PASS  = '';
 
-// Read raw JSON input or fallback to $_REQUEST / $_POST for LiteSpeed compatibility
+if (file_exists(__DIR__ . '/config.php')) {
+    include_once __DIR__ . '/config.php';
+}
+
+if (empty($INFO_PASS) && defined('INFO_EMAIL_PASS')) {
+    $INFO_PASS = INFO_EMAIL_PASS;
+}
+if (empty($APP_PASS) && defined('APPLICATIONS_EMAIL_PASS')) {
+    $APP_PASS = APPLICATIONS_EMAIL_PASS;
+}
+
 $input = @file_get_contents('php://input');
 $data = @json_decode($input, true);
 
@@ -33,14 +39,24 @@ if (empty($data) || (empty($data['type']) && empty($data['fullName']) && empty($
 }
 
 /**
- * Pure PHP SMTP Socket Mailer for cPanel hosting
+ * Robust Dual-Port (SSL 465 / TLS 587) cPanel SMTP Socket Mailer
  */
 class SmtpMailer {
-    public static function send($host, $port, $username, $password, $to, $subject, $body) {
-        if (empty($password) || $password === 'YOUR_INFO_EMAIL_PASSWORD' || $password === 'YOUR_APPLICATIONS_EMAIL_PASSWORD') {
+    public static function send($host, $username, $password, $to, $subject, $body) {
+        if (empty($password) || strpos($password, 'PASTE_') !== false || strpos($password, 'YOUR_') !== false) {
             return false;
         }
 
+        // Try Port 465 SSL
+        $res = self::sendSocket($host, 465, true, $username, $password, $to, $subject, $body);
+        if ($res) return true;
+
+        // Try Port 587 TLS
+        return self::sendSocket($host, 587, false, $username, $password, $to, $subject, $body);
+    }
+
+    private static function sendSocket($host, $port, $isSsl, $username, $password, $to, $subject, $body) {
+        $prefix = $isSsl ? "ssl://" : "";
         $context = stream_context_create([
             'ssl' => [
                 'verify_peer' => false,
@@ -49,7 +65,7 @@ class SmtpMailer {
             ]
         ]);
 
-        $socket = @stream_socket_client("ssl://{$host}:{$port}", $errno, $errstr, 15, STREAM_CLIENT_CONNECT, $context);
+        $socket = @stream_socket_client("{$prefix}{$host}:{$port}", $errno, $errstr, 12, STREAM_CLIENT_CONNECT, $context);
         if (!$socket) return false;
 
         $getResponse = function() use ($socket) {
@@ -63,6 +79,15 @@ class SmtpMailer {
 
         $getResponse();
         fputs($socket, "EHLO {$host}\r\n"); $getResponse();
+
+        if (!$isSsl) {
+            fputs($socket, "STARTTLS\r\n"); $starttls = $getResponse();
+            if (strpos($starttls, '220') !== false) {
+                @stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+                fputs($socket, "EHLO {$host}\r\n"); $getResponse();
+            }
+        }
+
         fputs($socket, "AUTH LOGIN\r\n"); $getResponse();
         fputs($socket, base64_encode($username) . "\r\n"); $getResponse();
         fputs($socket, base64_encode($password) . "\r\n"); $authRes = $getResponse();
@@ -123,7 +148,7 @@ if ($type === 'application') {
     $message .= "Bank Name: " . ($data['bankName'] ?? '') . "\n";
     $message .= "Account Number: " . ($data['accountNumber'] ?? '') . "\n";
 
-    $sent = SmtpMailer::send('mail.springcashloans.co.za', 465, 'applications@springcashloans.co.za', $APP_PASS, $to, $subject, $message);
+    $sent = SmtpMailer::send('mail.springcashloans.co.za', 'applications@springcashloans.co.za', $APP_PASS, $to, $subject, $message);
     echo json_encode(['success' => true, 'refNumber' => $ref, 'mailSent' => (bool)$sent]);
     exit();
 } else {
@@ -143,7 +168,7 @@ if ($type === 'application') {
     $message .= "------------------------------------------\n";
     $message .= ($data['message'] ?? '') . "\n";
 
-    $sent = SmtpMailer::send('mail.springcashloans.co.za', 465, 'info@springcashloans.co.za', $INFO_PASS, $to, $subject, $message);
+    $sent = SmtpMailer::send('mail.springcashloans.co.za', 'info@springcashloans.co.za', $INFO_PASS, $to, $subject, $message);
     echo json_encode(['success' => true, 'refNumber' => $ref, 'mailSent' => (bool)$sent]);
     exit();
 }
