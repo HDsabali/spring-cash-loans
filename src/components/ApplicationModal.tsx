@@ -311,18 +311,49 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
     return true;
   };
 
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     if (!validateStep()) return;
 
     if (step === 5) {
-      // Trigger Submit Application Flow
+      // Trigger Submit Application Flow to cPanel Mail API
       setIsSubmitting(true);
-      setTimeout(() => {
-        const generatedRef = `APP-ZA-2026-${Math.floor(10000 + Math.random() * 90000)}`;
-        setRefNumber(generatedRef);
-        setIsSubmitting(false);
-        setStep(6);
-      }, 1500);
+      const generatedRef = `APP-ZA-2026-${Math.floor(10000 + Math.random() * 90000)}`;
+
+      try {
+        await fetch('/api/submit.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'application',
+            refNumber: generatedRef,
+            loanType: loanType,
+            amount: amount,
+            term: term,
+            monthlyRepayment: repaymentData.monthlyRepayment,
+
+            title: personalDetails.title,
+            applicantName: `${personalDetails.firstName} ${personalDetails.surname}`,
+            idOrPassport: personalDetails.idOrPassport,
+            mobileNumber: personalDetails.mobileNumber,
+            email: personalDetails.email,
+            address: personalDetails.residentialAddress,
+            city: personalDetails.city,
+            province: personalDetails.province,
+
+            employmentStatus: employmentDetails.employmentStatus,
+            monthlyIncome: employmentDetails.grossMonthlyIncome,
+            bankName: bankDetails.bankName,
+            accountNumber: bankDetails.accountNumber,
+            accountType: bankDetails.accountType,
+          }),
+        });
+      } catch (err) {
+        console.warn('Backend application submission warning:', err);
+      }
+
+      setRefNumber(generatedRef);
+      setIsSubmitting(false);
+      setStep(6);
     } else {
       setStep((prev) => prev + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });

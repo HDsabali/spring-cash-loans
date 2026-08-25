@@ -50,6 +50,8 @@ export interface CompanyConfig {
   totalCustomersHelped: string;
   phonePlaceholder: string;
   emailPlaceholder: string;
+  contactEmail: string;
+  applicationsEmail: string;
   headOfficePlaceholder: string;
   ncaRegistrationPlaceholder: string;
 }
@@ -87,6 +89,8 @@ export const companyConfig: CompanyConfig = {
   totalCustomersHelped: "1.3M+",
   phonePlaceholder: "+27 (0) 800 123 4567",
   emailPlaceholder: "info@springcashloans.co.za",
+  contactEmail: "info@springcashloans.co.za",
+  applicationsEmail: "applications@springcashloans.co.za",
   headOfficePlaceholder: "South Africa",
   ncaRegistrationPlaceholder: "National Credit Regulator (NCR) Number: NCRCP19642",
 };

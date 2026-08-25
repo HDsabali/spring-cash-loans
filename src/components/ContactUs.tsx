@@ -77,18 +77,38 @@ export const ContactUs: React.FC<ContactUsProps> = ({ onOpenApplyModal, onGoHome
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      const ref = `ENQ-ZA-2026-${Math.floor(10000 + Math.random() * 90000)}`;
-      setSubmittedRef(ref);
-      setIsSubmitting(false);
-      setIsSuccess(true);
-      window.scrollTo({ top: 400, behavior: 'smooth' });
-    }, 1200);
+    const ref = `ENQ-ZA-2026-${Math.floor(10000 + Math.random() * 90000)}`;
+
+    try {
+      await fetch('/api/submit.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'contact',
+          refNumber: ref,
+          fullName: formData.fullName,
+          email: formData.email,
+          mobileNumber: formData.mobileNumber,
+          category: formData.category,
+          contactMethod: formData.contactMethod,
+          message: formData.message,
+          privacyConsent: formData.privacyConsent,
+          marketingConsent: formData.marketingConsent,
+        }),
+      });
+    } catch (err) {
+      console.warn('Backend email submission warning:', err);
+    }
+
+    setSubmittedRef(ref);
+    setIsSubmitting(false);
+    setIsSuccess(true);
+    window.scrollTo({ top: 400, behavior: 'smooth' });
   };
 
   const faqs = [
