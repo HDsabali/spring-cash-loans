@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, CheckCircle, ShieldCheck, ChevronRight, ChevronLeft, ChevronDown, Upload, 
   FileText, Lock, User, UserCheck, Briefcase, Car, Plus, Trash2, HelpCircle, 
