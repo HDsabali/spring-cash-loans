@@ -139,10 +139,6 @@ export const ContactUs: React.FC<ContactUsProps> = ({ onOpenApplyModal, onGoHome
       q: 'Can I change my loan amount or repayment period?',
       a: 'If your application has not yet been finalised, contact our team to discuss whether changes can be made.',
     },
-    {
-      q: 'What interest rate will I receive?',
-      a: 'Our rates start from 11.75% p.a. Your actual interest rate and final loan terms will depend on your application and assessment.',
-    },
   ];
 
   return (
