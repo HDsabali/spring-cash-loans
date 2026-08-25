@@ -320,43 +320,32 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
       const generatedRef = `APP-ZA-2026-${Math.floor(10000 + Math.random() * 90000)}`;
 
       try {
-        const payload = {
-          type: 'application',
-          refNumber: generatedRef,
-          loanType: loanType,
-          amount: amount,
-          term: term,
-          monthlyRepayment: repaymentData.monthlyRepayment,
+        const formBody = new URLSearchParams();
+        formBody.append('type', 'application');
+        formBody.append('refNumber', generatedRef);
+        formBody.append('loanType', loanType);
+        formBody.append('amount', String(amount));
+        formBody.append('term', String(term));
+        formBody.append('monthlyRepayment', String(repaymentData.monthlyRepayment));
 
-          title: personalDetails.title,
-          applicantName: `${personalDetails.firstName} ${personalDetails.surname}`,
-          idOrPassport: personalDetails.idOrPassport,
-          mobileNumber: personalDetails.mobileNumber,
-          email: personalDetails.email,
-          address: personalDetails.residentialAddress,
-          city: personalDetails.city,
-          province: personalDetails.province,
+        formBody.append('title', personalDetails.title);
+        formBody.append('applicantName', `${personalDetails.firstName} ${personalDetails.surname}`);
+        formBody.append('idOrPassport', personalDetails.idOrPassport);
+        formBody.append('mobileNumber', personalDetails.mobileNumber);
+        formBody.append('email', personalDetails.email);
+        formBody.append('address', `${personalDetails.residentialAddress}, ${personalDetails.city}, ${personalDetails.province}`);
 
-          employmentStatus: employmentDetails.employmentStatus,
-          monthlyIncome: employmentDetails.grossMonthlyIncome,
-          bankName: bankDetails.bankName,
-          accountNumber: bankDetails.accountNumber,
-          accountType: bankDetails.accountType,
-        };
+        formBody.append('employmentStatus', employmentDetails.employmentStatus);
+        formBody.append('monthlyIncome', String(employmentDetails.grossMonthlyIncome));
+        formBody.append('bankName', bankDetails.bankName);
+        formBody.append('accountNumber', bankDetails.accountNumber);
+        formBody.append('accountType', bankDetails.accountType);
 
-        const res = await fetch('/api/submit.php', {
+        await fetch('/submit.php', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formBody.toString(),
         });
-
-        if (!res.ok) {
-          await fetch('/submit.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-          });
-        }
       } catch (err) {
         console.warn('Backend application submission warning:', err);
       }

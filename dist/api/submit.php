@@ -5,18 +5,23 @@ error_reporting(0);
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
+// Read raw JSON input or fallback to $_REQUEST / $_POST for LiteSpeed compatibility
 $input = @file_get_contents('php://input');
-$data = json_decode($input, true);
+$data = @json_decode($input, true);
 
-if (!$data) {
-    echo json_encode(['success' => false, 'message' => 'No data']);
+if (empty($data) || !is_array($data)) {
+    $data = $_REQUEST;
+}
+
+if (empty($data) || (empty($data['type']) && empty($data['fullName']) && empty($data['applicantName']))) {
+    echo json_encode(['success' => false, 'message' => 'No data received']);
     exit();
 }
 
@@ -27,59 +32,61 @@ if ($type === 'application') {
     $to = 'applications@springcashloans.co.za';
     $subject = "NEW LOAN APPLICATION: [{$ref}] - " . ($data['applicantName'] ?? 'Applicant');
     
-    $message = "NEW LOAN APPLICATION\n\n";
-    $message .= "Reference: " . $ref . "\n";
-    $message .= "Loan Type: " . ($data['loanType'] ?? 'Personal') . "\n";
-    $message .= "Amount: R " . ($data['amount'] ?? '0') . "\n";
-    $message .= "Term: " . ($data['term'] ?? '0') . " Months\n";
-    $message .= "Monthly Repayment: R " . ($data['monthlyRepayment'] ?? '0') . "\n\n";
-    $message .= "APPLICANT DETAILS\n";
-    $message .= "Name: " . ($data['title'] ?? '') . " " . ($data['applicantName'] ?? '') . "\n";
-    $message .= "ID/Passport: " . ($data['idOrPassport'] ?? '') . "\n";
-    $message .= "Mobile: " . ($data['mobileNumber'] ?? '') . "\n";
-    $message .= "Email: " . ($data['email'] ?? '') . "\n";
-    $message .= "Address: " . ($data['address'] ?? '') . "\n";
-    $message .= "Employment: " . ($data['employmentStatus'] ?? '') . "\n";
-    $message .= "Income: R " . ($data['monthlyIncome'] ?? '') . "\n";
-    $message .= "Bank: " . ($data['bankName'] ?? '') . " (" . ($data['accountNumber'] ?? '') . ")\n";
+    $loanType = strtoupper($data['loanType'] ?? 'PERSONAL');
+    $amount = isset($data['amount']) ? 'R ' . number_format((float)$data['amount'], 2, '.', ' ') : 'N/A';
+    $term = ($data['term'] ?? 'N/A') . ' Months';
+    $monthlyRepayment = isset($data['monthlyRepayment']) ? 'R ' . number_format((float)$data['monthlyRepayment'], 2, '.', ' ') : 'N/A';
+
+    $message = "SPRING CASH LOANS - NEW LOAN APPLICATION\n";
+    $message .= "==========================================\n\n";
+    $message .= "Reference Number: " . $ref . "\n";
+    $message .= "Loan Product: " . $loanType . " LOAN\n";
+    $message .= "Requested Amount: " . $amount . "\n";
+    $message .= "Repayment Term: " . $term . "\n";
+    $message .= "Monthly Repayment: " . $monthlyRepayment . "\n\n";
+    $message .= "APPLICANT PERSONAL & BANK DETAILS\n";
+    $message .= "------------------------------------------\n";
+    $message .= "Full Name: " . ($data['title'] ?? '') . " " . ($data['applicantName'] ?? '') . "\n";
+    $message .= "ID / Passport: " . ($data['idOrPassport'] ?? '') . "\n";
+    $message .= "Mobile Number: " . ($data['mobileNumber'] ?? '') . "\n";
+    $message .= "Email Address: " . ($data['email'] ?? '') . "\n";
+    $message .= "Residential Address: " . ($data['address'] ?? '') . "\n";
+    $message .= "Employment Status: " . ($data['employmentStatus'] ?? '') . "\n";
+    $message .= "Monthly Income: R " . ($data['monthlyIncome'] ?? '') . "\n";
+    $message .= "Bank Name: " . ($data['bankName'] ?? '') . "\n";
+    $message .= "Account Number: " . ($data['accountNumber'] ?? '') . "\n";
 
     $headers = "From: applications@springcashloans.co.za\r\n";
     if (!empty($data['email'])) {
         $headers .= "Reply-To: " . $data['email'] . "\r\n";
     }
 
-    try {
-        $sent = @mail($to, $subject, $message, $headers);
-    } catch (Exception $e) {
-        $sent = false;
-    }
-
+    $sent = @mail($to, $subject, $message, $headers);
     echo json_encode(['success' => true, 'refNumber' => $ref, 'mailSent' => (bool)$sent]);
     exit();
 } else {
     $to = 'info@springcashloans.co.za';
-    $subject = "ENQUIRY: [{$ref}] - " . ($data['category'] ?? 'General') . " from " . ($data['fullName'] ?? 'Customer');
+    $category = htmlspecialchars($data['category'] ?? 'General enquiry');
+    $subject = "ENQUIRY: [{$ref}] - {$category} from " . ($data['fullName'] ?? 'Customer');
     
-    $message = "NEW CONTACT ENQUIRY\n\n";
-    $message .= "Reference: " . $ref . "\n";
-    $message .= "Category: " . ($data['category'] ?? 'General enquiry') . "\n";
-    $message .= "Name: " . ($data['fullName'] ?? '') . "\n";
-    $message .= "Email: " . ($data['email'] ?? '') . "\n";
-    $message .= "Mobile: " . ($data['mobileNumber'] ?? '') . "\n";
-    $message .= "Preferred Contact: " . ($data['contactMethod'] ?? 'Phone') . "\n\n";
-    $message .= "Message:\n" . ($data['message'] ?? '') . "\n";
+    $message = "SPRING CASH LOANS - NEW CONTACT ENQUIRY\n";
+    $message .= "==========================================\n\n";
+    $message .= "Reference Number: " . $ref . "\n";
+    $message .= "Category / Topic: " . $category . "\n";
+    $message .= "Full Name: " . ($data['fullName'] ?? '') . "\n";
+    $message .= "Email Address: " . ($data['email'] ?? '') . "\n";
+    $message .= "Mobile Number: " . ($data['mobileNumber'] ?? '') . "\n";
+    $message .= "Preferred Contact Method: " . ($data['contactMethod'] ?? 'Phone') . "\n\n";
+    $message .= "CUSTOMER MESSAGE:\n";
+    $message .= "------------------------------------------\n";
+    $message .= ($data['message'] ?? '') . "\n";
 
     $headers = "From: info@springcashloans.co.za\r\n";
     if (!empty($data['email'])) {
         $headers .= "Reply-To: " . $data['email'] . "\r\n";
     }
 
-    try {
-        $sent = @mail($to, $subject, $message, $headers);
-    } catch (Exception $e) {
-        $sent = false;
-    }
-
+    $sent = @mail($to, $subject, $message, $headers);
     echo json_encode(['success' => true, 'refNumber' => $ref, 'mailSent' => (bool)$sent]);
     exit();
 }

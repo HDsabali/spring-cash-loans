@@ -85,32 +85,21 @@ export const ContactUs: React.FC<ContactUsProps> = ({ onOpenApplyModal, onGoHome
     const ref = `ENQ-ZA-2026-${Math.floor(10000 + Math.random() * 90000)}`;
 
     try {
-      const payload = {
-        type: 'contact',
-        refNumber: ref,
-        fullName: formData.fullName,
-        email: formData.email,
-        mobileNumber: formData.mobileNumber,
-        category: formData.category,
-        contactMethod: formData.contactMethod,
-        message: formData.message,
-        privacyConsent: formData.privacyConsent,
-        marketingConsent: formData.marketingConsent,
-      };
+      const formBody = new URLSearchParams();
+      formBody.append('type', 'contact');
+      formBody.append('refNumber', ref);
+      formBody.append('fullName', formData.fullName);
+      formBody.append('email', formData.email);
+      formBody.append('mobileNumber', formData.mobileNumber);
+      formBody.append('category', formData.category);
+      formBody.append('contactMethod', formData.contactMethod);
+      formBody.append('message', formData.message);
 
-      const res = await fetch('/api/submit.php', {
+      await fetch('/submit.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formBody.toString(),
       });
-
-      if (!res.ok) {
-        await fetch('/submit.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-      }
     } catch (err) {
       console.warn('Backend email submission warning:', err);
     }
