@@ -1083,7 +1083,6 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
                     {[
                       { key: 'idDoc', label: 'South African ID Document' },
                       { key: 'payslipDoc', label: 'Latest Payslip / Proof of Income' },
-                      { key: 'addressDoc', label: 'Proof of Address (Max 3 months old)' },
                     ].map((docItem) => {
                       const docState = documents[docItem.key as keyof typeof documents];
                       return (
@@ -1160,38 +1159,6 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
                       <span className="text-base font-bold text-white">{formatRandSpace(repaymentData.totalRepayment, true)}</span>
                     </div>
                   </div>
-                </div>
-
-                {/* Loan Purpose Selector */}
-                <div className="space-y-3">
-                  <label className="text-sm font-bold text-[#102A43]">What will you use the loan for? *</label>
-                  <div className="relative">
-                    <select
-                      value={loanPurpose}
-                      onChange={(e) => setLoanPurpose(e.target.value)}
-                      className="w-full p-3.5 pr-10 bg-slate-50 border border-[#E4E7EB] rounded-xl text-sm font-semibold text-[#102A43] appearance-none outline-none focus:ring-2 focus:ring-[#168C8C] focus:bg-white cursor-pointer transition-all"
-                    >
-                      <option>Home Improvements</option>
-                      <option>Education & Tuition</option>
-                      <option>Solar / Renewable Energy Installation</option>
-                      <option>Water & Security Infrastructure</option>
-                      <option>Vehicle Maintenance & Expenses</option>
-                      <option>Debt Consolidation</option>
-                      <option>Emergency Expenses</option>
-                      <option>Other Purpose</option>
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-[#168C8C] absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
-
-                  {loanPurpose === 'Other Purpose' && (
-                    <input
-                      type="text"
-                      placeholder="Please specify your loan purpose..."
-                      value={customPurpose}
-                      onChange={(e) => setCustomPurpose(e.target.value)}
-                      className="w-full p-3 bg-slate-50 border border-[#E4E7EB] rounded-xl text-sm font-semibold"
-                    />
-                  )}
                 </div>
 
 
