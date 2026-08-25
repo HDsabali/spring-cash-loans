@@ -399,7 +399,7 @@ export const ContactUs: React.FC<ContactUsProps> = ({ onOpenApplyModal, onGoHome
           <div className="lg:col-span-4 space-y-6">
             
             {/* 7. RIGHT-SIDE HELP PANEL */}
-            <div className="bg-white border border-[#E4E7EB] rounded-2xl p-6 shadow-sm space-y-6">
+            <div className="hidden lg:block bg-white border border-[#E4E7EB] rounded-2xl p-6 shadow-sm space-y-6">
               <h3 className="font-bold text-lg text-[#102A43] border-b border-[#E4E7EB] pb-3">
                 Before you contact us
               </h3>
@@ -444,8 +444,6 @@ export const ContactUs: React.FC<ContactUsProps> = ({ onOpenApplyModal, onGoHome
               </div>
             </div>
 
-
-
           </div>
 
         </div>
@@ -488,7 +486,7 @@ export const ContactUs: React.FC<ContactUsProps> = ({ onOpenApplyModal, onGoHome
       </section>
 
       {/* 10. COMPLAINTS AND FEEDBACK */}
-      <section className="py-12 max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-4">
+      <section className="hidden lg:block py-12 max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-4">
         <h3 className="text-xl font-bold text-[#102A43]">Complaints and feedback</h3>
         <p className="text-slate-600 text-sm max-w-xl mx-auto leading-relaxed">
           We're committed to providing a fair and professional service. If you're unhappy with any aspect of your experience, we'd like to hear from you.
@@ -505,7 +503,7 @@ export const ContactUs: React.FC<ContactUsProps> = ({ onOpenApplyModal, onGoHome
       </section>
 
       {/* 12. NATIONWIDE SERVICE BANNER */}
-      <section className="bg-[#12355B] text-white py-14 border-t border-[#102A43]">
+      <section className="hidden lg:block bg-[#12355B] text-white py-14 border-t border-[#102A43]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 max-w-3xl">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
             We're here to help, wherever you are.
