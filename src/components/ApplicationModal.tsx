@@ -56,14 +56,16 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
   const [refNumber, setRefNumber] = useState<string>('');
 
   // Step 1 State: Personalise
-  const [loanType, setLoanType] = useState<'personal' | 'business' | 'asset'>(initialLoanType);
-  const [amount, setAmount] = useState<number>(initialAmount);
-  const [amountInput, setAmountInput] = useState<string>(String(initialAmount));
-  const [term, setTerm] = useState<number>(initialTerm);
+  const [loanType, setLoanType] = useState<'personal' | 'business' | 'asset'>(initialLoanType || 'personal');
+  const [amount, setAmount] = useState<number>(initialAmount || 50000);
+  const [amountInput, setAmountInput] = useState<string>(String(initialAmount || 50000));
+  const [term, setTerm] = useState<number>(initialTerm || 24);
   const [creditProtectionChoice, setCreditProtectionChoice] = useState<'yes' | 'no' | 'existing'>('yes');
 
   useEffect(() => {
-    setAmountInput(String(amount));
+    if (amount) {
+      setAmountInput(String(amount));
+    }
   }, [amount]);
 
   // Step 2 State: Your Details
