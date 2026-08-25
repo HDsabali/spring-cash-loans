@@ -1077,7 +1077,7 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
                 {/* Smart Document Upload Area */}
                 <div className="space-y-4 pt-4 border-t border-[#E4E7EB]">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-[#168C8C]">Smart Document Upload</h3>
-                  <p className="text-xs text-slate-500">Upload clear copies of your required documents (PDF, JPG, PNG up to 10MB each).</p>
+                  <p className="text-xs text-slate-500">Upload clear copies of your required documents (JPG, PNG Only up to 10MB each).</p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[
@@ -1100,7 +1100,7 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
                             <span>{docState.uploaded ? docState.name : 'Upload Document'}</span>
                             <input
                               type="file"
-                              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                              accept=".jpg,.jpeg,.png"
                               className="hidden"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
