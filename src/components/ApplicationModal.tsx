@@ -1443,16 +1443,10 @@ STATUS: APPLICATION SUBMITTED & UNDER ASSESSMENT
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <button
-              onClick={handleDownloadSummary}
-              className="w-full sm:w-auto bg-[#12355B] hover:bg-[#102A43] text-white font-bold px-6 py-3.5 rounded-full transition-all text-sm flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <Download className="w-4 h-4" /> Download Application Summary
-            </button>
+          <div className="flex items-center justify-center pt-4">
             <button
               onClick={onClose}
-              className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-[#102A43] font-bold px-6 py-3.5 rounded-full transition-all text-sm cursor-pointer border border-[#E4E7EB]"
+              className="w-full sm:w-auto bg-[#12355B] hover:bg-[#102A43] text-white font-bold px-8 py-3.5 rounded-full transition-all text-sm cursor-pointer border border-[#E4E7EB] shadow-sm"
             >
               Return to Main Page
             </button>
