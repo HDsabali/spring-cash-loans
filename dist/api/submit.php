@@ -140,7 +140,7 @@ if ($submissionType === 'application') {
 
     $headers = "MIME-Version: 1.0" . "\r\n";
     $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-    $headers .= "From: Spring Cash Loans <website@springcashloans.co.za>" . "\r\n";
+    $headers .= "From: Spring Cash Loans <info@springcashloans.co.za>" . "\r\n";
     if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $headers .= "Reply-To: {$email}" . "\r\n";
     }
@@ -217,7 +217,7 @@ if ($submissionType === 'application') {
 
     $headers = "MIME-Version: 1.0" . "\r\n";
     $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-    $headers .= "From: Spring Cash Loans <website@springcashloans.co.za>" . "\r\n";
+    $headers .= "From: Spring Cash Loans <info@springcashloans.co.za>" . "\r\n";
     if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $headers .= "Reply-To: {$email}" . "\r\n";
     }
