@@ -95,11 +95,19 @@ export const ContactUs: React.FC<ContactUsProps> = ({ onOpenApplyModal, onGoHome
       formBody.append('contactMethod', formData.contactMethod);
       formBody.append('message', formData.message);
 
-      await fetch('/submit.php', {
+      const res = await fetch('/submit.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formBody.toString(),
       });
+
+      if (!res.ok) {
+        await fetch('/api/submit.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formBody.toString(),
+        });
+      }
     } catch (err) {
       console.warn('Backend email submission warning:', err);
     }

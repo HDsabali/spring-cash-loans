@@ -341,11 +341,19 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
         formBody.append('accountNumber', bankDetails.accountNumber);
         formBody.append('accountType', bankDetails.accountType);
 
-        await fetch('/submit.php', {
+        const res = await fetch('/submit.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: formBody.toString(),
         });
+
+        if (!res.ok) {
+          await fetch('/api/submit.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formBody.toString(),
+          });
+        }
       } catch (err) {
         console.warn('Backend application submission warning:', err);
       }
