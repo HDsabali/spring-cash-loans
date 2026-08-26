@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
 
 interface WhatsAppButtonProps {
-  phoneNumber?: string; // e.g. "27820000000"
-  defaultMessage?: string;
+  url?: string;
 }
 
 export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
-  phoneNumber = '27820000000',
-  defaultMessage = 'Hello, I would like to enquire about a loan.',
+  url = 'https://api.whatsapp.com/message/BRWFZPJLWQYVE1?autoload=1&app_absent=0',
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
-  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(defaultMessage)}`;
+  const whatsappUrl = url;
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3">
