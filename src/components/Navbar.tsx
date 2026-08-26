@@ -66,16 +66,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenApplyModal, onGoHome, onOp
     <>
       {/* Top regulatory & trust banner */}
       <div className="bg-[#0B1F33] text-slate-300 text-xs py-2.5 px-4 border-b border-[#102A43]">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+        <div className="max-w-7xl mx-auto flex items-center justify-center sm:justify-start">
           <div className="flex items-center gap-2 text-slate-300 font-medium">
             <span className="inline-flex items-center gap-1.5 font-semibold text-[#168C8C]">
               <ShieldCheck className="w-4 h-4 text-[#168C8C]" /> {companyConfig.ncaRegistrationPlaceholder}
-            </span>
-          </div>
-          <div className="flex items-center gap-4 text-slate-300 font-medium">
-            <span className="hidden lg:inline text-slate-300">{companyConfig.phonePlaceholder.split('[')[0]}</span>
-            <span className="text-[#168C8C] font-semibold flex items-center gap-1">
-              <Phone className="w-3.5 h-3.5" /> Nationwide Assistance
             </span>
           </div>
         </div>
