@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { TrustStats } from './components/TrustStats';
@@ -22,6 +22,28 @@ export function App() {
   const [modalAmount, setModalAmount] = useState<number>(50000);
   const [modalTerm, setModalTerm] = useState<number>(24);
 
+  useEffect(() => {
+    const handleUrlRoute = () => {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+
+      if (path.includes('/apply') || hash.includes('apply')) {
+        setIsApplyModalOpen(true);
+        setCurrentView('landing');
+      } else if (path.includes('/contact') || hash.includes('contact')) {
+        setIsApplyModalOpen(false);
+        setCurrentView('contact');
+      } else {
+        setIsApplyModalOpen(false);
+        setCurrentView('landing');
+      }
+    };
+
+    handleUrlRoute();
+    window.addEventListener('popstate', handleUrlRoute);
+    return () => window.removeEventListener('popstate', handleUrlRoute);
+  }, []);
+
   const handleOpenApplyModal = (
     loanType: 'personal' | 'business' | 'asset' = 'personal',
     amount: number = 50000,
@@ -31,18 +53,27 @@ export function App() {
     setModalAmount(amount);
     setModalTerm(term);
     setIsApplyModalOpen(true);
+    if (window.location.pathname !== '/apply') {
+      window.history.pushState(null, '', '/apply');
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleOpenContact = () => {
     setIsApplyModalOpen(false);
     setCurrentView('contact');
+    if (window.location.pathname !== '/contact') {
+      window.history.pushState(null, '', '/contact');
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleGoHome = () => {
     setIsApplyModalOpen(false);
     setCurrentView('landing');
+    if (window.location.pathname !== '/') {
+      window.history.pushState(null, '', '/');
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -150,6 +181,9 @@ export function App() {
             isOpen={isApplyModalOpen}
             onClose={() => {
               setIsApplyModalOpen(false);
+              if (window.location.pathname !== '/') {
+                window.history.pushState(null, '', '/');
+              }
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             initialLoanType={modalLoanType}
