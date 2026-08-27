@@ -87,7 +87,7 @@ export const companyConfig: CompanyConfig = {
   legalName: "SPRING CASH LOANS (PTY) LTD",
   yearsOperating: "30+",
   totalCustomersHelped: "1.3M+",
-  phonePlaceholder: "+27 (0) 800 123 4567",
+  phonePlaceholder: "+27 (71) 839 8978",
   emailPlaceholder: "info@springcashloans.co.za",
   contactEmail: "info@springcashloans.co.za",
   applicationsEmail: "applications@springcashloans.co.za",
