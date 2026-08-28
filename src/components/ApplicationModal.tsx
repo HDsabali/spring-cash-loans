@@ -1359,12 +1359,9 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
           </div>
 
           {/* Important Email Update & Follow-up Notice Box */}
-          <div className="bg-[#E7F4F2]/60 border border-[#168C8C]/30 p-5 sm:p-6 rounded-2xl text-left space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-[#168C8C]/10 rounded-xl text-[#168C8C] shrink-0 mt-0.5">
-                <Mail className="w-5 h-5" />
-              </div>
-              <div className="space-y-3 text-xs sm:text-sm text-[#102A43]">
+          <div className="bg-[#E7F4F2]/60 border border-[#168C8C]/30 p-5 sm:p-6 rounded-2xl text-left space-y-3">
+            <h4 className="font-extrabold text-[#12355B] text-base uppercase tracking-wider border-b border-[#168C8C]/20 pb-2">IMPORTANT</h4>
+            <div className="space-y-3 text-xs sm:text-sm text-[#102A43]">
                 <p className="font-medium leading-relaxed">
                   Please always check your email inbox, including your <strong className="font-bold text-[#12355B]">Spam/Junk folder</strong>, for updates regarding your loan application. Approval notifications and other important messages from our loan team may be delivered there.
                 </p>
@@ -1389,7 +1386,6 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
                   </p>
                 </div>
               </div>
-            </div>
           </div>
 
           {/* Application Status Timeline */}
