@@ -1358,29 +1358,6 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
             <span className="text-2xl font-extrabold text-[#12355B] tracking-wider">{refNumber}</span>
           </div>
 
-          {/* Application Status Timeline */}
-          <div className="bg-slate-50 p-6 rounded-2xl border border-[#E4E7EB] text-left space-y-4">
-            <h4 className="font-bold text-[#102A43] text-sm">Application Status Progress</h4>
-            <div className="space-y-3 text-xs">
-              {[
-                { label: '1. Application received', done: true },
-                { label: '2. Information being reviewed', active: true },
-                { label: '3. Credit assessment', pending: true },
-                { label: '4. Decision notification', pending: true },
-                { label: '5. Next steps & payout', pending: true },
-              ].map((st, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] ${
-                    st.done ? 'bg-green-600 text-white' : st.active ? 'bg-[#168C8C] text-white ring-2 ring-[#E7F4F2]' : 'bg-slate-200 text-slate-500'
-                  }`}>
-                    {st.done ? '✓' : i + 1}
-                  </div>
-                  <span className={`font-semibold ${st.done || st.active ? 'text-[#102A43]' : 'text-slate-400'}`}>{st.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Important Email Update & Follow-up Notice Box */}
           <div className="bg-[#E7F4F2]/60 border border-[#168C8C]/30 p-5 sm:p-6 rounded-2xl text-left space-y-4">
             <div className="flex items-start gap-3">
@@ -1412,6 +1389,29 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Application Status Timeline */}
+          <div className="bg-slate-50 p-6 rounded-2xl border border-[#E4E7EB] text-left space-y-4">
+            <h4 className="font-bold text-[#102A43] text-sm">Application Status Progress</h4>
+            <div className="space-y-3 text-xs">
+              {[
+                { label: '1. Application received', done: true },
+                { label: '2. Information being reviewed', active: true },
+                { label: '3. Credit assessment', pending: true },
+                { label: '4. Decision notification', pending: true },
+                { label: '5. Next steps & payout', pending: true },
+              ].map((st, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] ${
+                    st.done ? 'bg-green-600 text-white' : st.active ? 'bg-[#168C8C] text-white ring-2 ring-[#E7F4F2]' : 'bg-slate-200 text-slate-500'
+                  }`}>
+                    {st.done ? '✓' : i + 1}
+                  </div>
+                  <span className={`font-semibold ${st.done || st.active ? 'text-[#102A43]' : 'text-slate-400'}`}>{st.label}</span>
+                </div>
+              ))}
             </div>
           </div>
 
