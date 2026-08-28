@@ -1381,6 +1381,40 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
             </div>
           </div>
 
+          {/* Important Email Update & Follow-up Notice Box */}
+          <div className="bg-[#E7F4F2]/60 border border-[#168C8C]/30 p-5 sm:p-6 rounded-2xl text-left space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-[#168C8C]/10 rounded-xl text-[#168C8C] shrink-0 mt-0.5">
+                <Mail className="w-5 h-5" />
+              </div>
+              <div className="space-y-3 text-xs sm:text-sm text-[#102A43]">
+                <p className="font-medium leading-relaxed">
+                  Please always check your email inbox, including your <strong className="font-bold text-[#12355B]">Spam/Junk folder</strong>, for updates regarding your loan application. Approval notifications and other important messages from our loan team may be delivered there.
+                </p>
+                <p className="font-medium leading-relaxed">
+                  When you receive an acknowledgment or follow-up email from the loan team, please reply/respond to the email promptly so we can continue processing your application without unnecessary delays.
+                </p>
+                <div className="pt-2 border-t border-[#168C8C]/20 space-y-1.5">
+                  <p className="font-bold text-[#12355B]">
+                    Haven’t received any message within 4 hours?
+                  </p>
+                  <p className="font-medium">
+                    Please contact our loan team directly at:{' '}
+                    <a 
+                      href="mailto:applications@springcashloans.co.za" 
+                      className="font-bold text-[#168C8C] hover:underline break-all"
+                    >
+                      applications@springcashloans.co.za
+                    </a>
+                  </p>
+                  <p className="text-xs text-slate-500 italic pt-1">
+                    We’re here to assist you throughout the application process.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Action Buttons */}
           <div className="flex items-center justify-center pt-4">
             <button
