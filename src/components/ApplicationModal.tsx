@@ -266,8 +266,8 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
         setValidationError('Please select a loan type to proceed.');
         return false;
       }
-      if (amount < 5000 || amount > 350000) {
-        setValidationError('Please enter a valid loan amount between R 5 000 and R 350 000.');
+      if (amount < 40000 || amount > 350000) {
+        setValidationError('Please enter a valid loan amount between R 40 000 and R 350 000.');
         return false;
       }
       if (!term) {
@@ -563,7 +563,7 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
                 <div className="space-y-4 pt-4 border-t border-[#E4E7EB]">
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-bold text-[#102A43]">How much would you like to borrow?</label>
-                    <span className="text-xs text-[#168C8C] font-semibold">Min R 5 000 • Max R 350 000</span>
+                    <span className="text-xs text-[#168C8C] font-semibold">Min R 40 000 • Max R 350 000</span>
                   </div>
 
                   <div className="relative flex items-center">
@@ -578,12 +578,12 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
                         setAmountInput(raw);
                         const num = Number(raw);
                         if (!isNaN(num) && num > 0) {
-                          setAmount(Math.min(Math.max(num, 5000), 350000));
+                          setAmount(Math.min(Math.max(num, 40000), 350000));
                         }
                       }}
                       onBlur={() => {
                         let num = Number(amountInput);
-                        if (isNaN(num) || num < 5000) num = 5000;
+                        if (isNaN(num) || num < 40000) num = 40000;
                         if (num > 350000) num = 350000;
                         setAmount(num);
                         setAmountInput(String(num));
@@ -594,7 +594,7 @@ export const ApplicationModal: React.FC<ApplicationModalProps> = ({
 
                   <input
                     type="range"
-                    min={5000}
+                    min={40000}
                     max={350000}
                     step={5000}
                     value={amount}

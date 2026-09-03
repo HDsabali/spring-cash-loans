@@ -64,7 +64,7 @@ export const loanStatsConfig: LoanCategoryStats = {
 };
 
 export const calculatorConfig: CalculatorConfig = {
-  minimumLoanAmount: 5000,
+  minimumLoanAmount: 40000,
   maximumLoanAmount: 350000,
   loanStep: 5000,
   defaultLoanAmount: 50000,
